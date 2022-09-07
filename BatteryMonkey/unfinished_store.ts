@@ -1,28 +1,21 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import logger from 'redux-logger';
 
-type BluetoothState = {
-  availableDevices: Array<BluetoothPeripheral>;
-};
+import {configureStore, combineReducers} from '@reduxjs/toolkit';
+import bluetoothReducer from '../modules/Bluetooth/bluetooth.reducer';
+import {useDispatch} from 'react-redux';
 
-const initialState: BluetoothState = {
-  availableDevices: [],
-};
-
-const bluetoothReducer = createSlice({
-  name: 'bluetooth',
-  initialState: initialState,
-  reducers: {
-    bluetoothPeripheralsFound: (
-      state: BluetoothState,
-      action: PayloadAction<Array<BluetoothPeripheral>>,
-    ) => {
-      state.availableDevices = action.payload;
-    },
-  },
+const rootReducer = combineReducers({
+  bluetooth: bluetoothReducer.reducer,
 });
 
-export const {
-    bluetoothPeripheralsFound
-} = bluetoothReducer.actions
+export const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => {
+      return getDefaultMiddleware().concat(logger)
+  },
+  devTools: process.env.NODE_ENV === 'production'
+});
 
-export default bluetoothReducer
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
